@@ -61,34 +61,52 @@
             box-shadow: 0 0 40px rgba(0, 242, 255, 0.1);
         }
 
+        /* --- Camera Lens Frame Style --- */
         .lens-frame {
             position: relative;
-            width: 160px; height: 160px;
+            width: 170px; height: 170px;
             margin: 0 auto 35px;
             border-radius: 50%;
-            padding: 5px;
-            background: linear-gradient(45deg, var(--neon-cyan), transparent, var(--neon-green));
-            animation: rotateBorder 6s linear infinite;
+            padding: 8px;
+            background: #111;
+            border: 4px solid #333;
+            box-shadow: 0 0 0 4px #111, 0 0 20px rgba(0, 242, 255, 0.4);
             cursor: pointer;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .lens-frame:active {
-            transform: scale(0.92);
+        /* Lens Markings */
+        .lens-frame::after {
+            content: "LENS EF 50mm 1:1.8 STM";
+            position: absolute;
+            width: 100%; height: 100%;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 7px; color: rgba(255,255,255,0.4);
+            letter-spacing: 1px;
+            display: flex; align-items: flex-start; justify-content: center;
+            padding-top: 5px;
+            animation: rotateBorder 10s linear infinite;
         }
 
         @keyframes rotateBorder { to { transform: rotate(360deg); } }
 
         .logo-img {
-            width: 100%; height: 100%;
+            width: 92%; height: 92%;
             border-radius: 50%;
             object-fit: cover;
-            border: 4px solid #000;
-            animation: reverseRotate 6s linear infinite;
-            transition: opacity 0.3s ease;
+            border: 2px solid #000;
+            z-index: 2;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s;
         }
 
-        @keyframes reverseRotate { to { transform: rotate(-360deg); } }
+        /* Shutter Closing Effect */
+        .shutter-active .logo-img {
+            transform: scale(0) rotate(180deg);
+            filter: brightness(5);
+        }
 
         .name-main { 
             font-family: 'Orbitron', sans-serif;
@@ -182,7 +200,7 @@
 <div class="overlay-gradient"></div>
 
 <div class="container">
-    <div class="lens-frame" onclick="changePhotoEffect(this)">
+    <div class="lens-frame" id="lens-trigger" onclick="captureEffect()">
         <img src="https://i.postimg.cc/Hnsth8bN/IMG-6740.jpg" id="profile-img" class="logo-img" alt="Azad Rekane">
     </div>
 
@@ -223,27 +241,35 @@
         flash.style.opacity = '1'; 
         
         setTimeout(() => {
-            flash.style.transition = 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            flash.style.transition = 'opacity 0.6s ease-out';
             flash.style.opacity = '0'; 
-        }, 50);
+        }, 40);
     }
 
-    setInterval(triggerFlash, 12000);
-
-    // Dynamic Photo Change on Click
-    function changePhotoEffect(element) {
+    // Advanced Lens Capture Animation
+    let isSecondImage = false;
+    function captureEffect() {
+        const frame = document.getElementById('lens-trigger');
         const img = document.getElementById('profile-img');
-        const secondImg = "https://i.postimg.cc/fT1xxrgQ/IMG-6739.jpg";
         const firstImg = "https://i.postimg.cc/Hnsth8bN/IMG-6740.jpg";
-        
+        const secondImg = "https://i.postimg.cc/fT1xxrgQ/IMG-6739.jpg";
+
+        // Step 1: Shutter Closes
+        frame.classList.add('shutter-active');
         triggerFlash();
-        
-        img.style.opacity = "0";
+
         setTimeout(() => {
-            img.src = img.src === firstImg ? secondImg : firstImg;
-            img.style.opacity = "1";
-        }, 300);
+            // Step 2: Switch Image
+            isSecondImage = !isSecondImage;
+            img.src = isSecondImage ? secondImg : firstImg;
+            
+            // Step 3: Shutter Opens
+            frame.classList.remove('shutter-active');
+        }, 400);
     }
+
+    // Auto flash interval
+    setInterval(triggerFlash, 15000);
 
     // Dynamic Service Text
     const services = [
